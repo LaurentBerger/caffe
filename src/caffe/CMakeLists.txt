@@ -13,8 +13,9 @@ list(INSERT Caffe_LINKER_LIBS 0 PUBLIC caffeproto) # note, crucial to prepend!
 # --[ Caffe library
 
 # creates 'test_srcs', 'srcs', 'test_cuda', 'cuda' lists
+message("sssss   ${caffe_symbols_hdr} -> ${PROJECT_SOURCE_DIR}")
 caffe_pickup_caffe_sources(${PROJECT_SOURCE_DIR})
-
+message("sssss   ${caffe_symbols_hdr} -> ${PROJECT_SOURCE_DIR}")
 # add this option here since CUDA will not honor
 # target_compile_definitions
 if(MSVC AND NOT BUILD_SHARED_LIBS)
@@ -79,6 +80,8 @@ elseif(MSVC AND NOT BUILD_SHARED_LIBS)
   # add a custom build command that generates a list of symbols
   # to force linking. This is required because MSVC as nothing
   # the whole-archive option
+  message("windows_create_link_header(caffe ${caffe_symbols_hdr}")
+  set(caffe_symbols_hdr G:/Lib/build/CaffeBis/caffe/include_symbols.hpp)
   windows_create_link_header(caffe ${caffe_symbols_hdr})
   get_filename_component(_name ${caffe_symbols_hdr} NAME)
   set(CAFFE_INCLUDE_SYMBOLS "#include \"caffe/${_name}\"")
@@ -94,7 +97,9 @@ if(MSVC AND USE_NCCL)
   add_dependencies(caffe nccl)
 endif()
 
-configure_file(${caffe_export_hdr_in} ${caffe_export_hdr})
+message("${caffe_export_hdr_in} **** ${caffe_export_hdr}")
+
+#configure_file(${caffe_export_hdr_in} ${caffe_export_hdr})
 
 # ---[ Tests
  add_subdirectory(test)

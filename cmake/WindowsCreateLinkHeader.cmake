@@ -28,6 +28,7 @@ function(find_dumpbin var)
     # 1700 = VS 11.0
     # 1800 = VS 12.0
     # 1900 = VS 14.0
+    # 1912 = VS 15.0
     set(MSVC_PRODUCT_VERSION_1200 6.0)
     set(MSVC_PRODUCT_VERSION_1300 7.0)
     set(MSVC_PRODUCT_VERSION_1310 7.1)
@@ -37,6 +38,7 @@ function(find_dumpbin var)
     set(MSVC_PRODUCT_VERSION_1700 11.0)
     set(MSVC_PRODUCT_VERSION_1800 12.0)
     set(MSVC_PRODUCT_VERSION_1900 14.0)
+    set(MSVC_PRODUCT_VERSION_1912 15.0)
     get_filename_component(MSVC_VC_DIR [HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\${MSVC_PRODUCT_VERSION_${MSVC_VERSION}}\\Setup\\VC;ProductDir] REALPATH CACHE)
 
     find_program(DUMPBIN_EXECUTABLE dumpbin ${MSVC_VC_DIR}/bin)

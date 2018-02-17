@@ -7,13 +7,8 @@ set(Caffe_COMPILE_OPTIONS "")
 # ---[ Boost
 find_package(Boost 1.54 REQUIRED COMPONENTS system thread filesystem)
 list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${Boost_INCLUDE_DIRS})
-list(APPEND Caffe_DEFINITIONS PUBLIC -DBOOST_ALL_NO_LIB)
 list(APPEND Caffe_LINKER_LIBS PUBLIC ${Boost_LIBRARIES})
 
-if(DEFINED MSVC AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18.0.40629.0)
-  # Required for VS 2013 Update 4 or earlier.
-  list(APPEND Caffe_DEFINITIONS PUBLIC -DBOOST_NO_CXX11_TEMPLATE_ALIASES)
-endif()
 # ---[ Threads
 find_package(Threads REQUIRED)
 list(APPEND Caffe_LINKER_LIBS PRIVATE ${CMAKE_THREAD_LIBS_INIT})
@@ -36,6 +31,32 @@ endif()
 
 # ---[ Google-glog
 include("cmake/External/glog.cmake")
+
+# GFlags.
+if (GFLAGS_FOUND)
+message("-- Found Google Flags header in: ${GFLAGS_INCLUDE_DIRS}, "
+"in namespace: ${GFLAGS_NAMESPACE}")
+add_definitions(-DCERES_GFLAGS_NAMESPACE=${GFLAGS_NAMESPACE})
+else (GFLAGS_FOUND)
+message("-- Did not find Google Flags (gflags), Building without gflags "
+"- no tests or tools will be built!")
+update_cache_variable(GFLAGS OFF)
+endif (GFLAGS_FOUND)
+
+# By default, assume gflags was found, updating the message if it was not.
+set(GLOG_GFLAGS_DEPENDENCY_MESSAGE
+" Assuming glog was built with gflags support as gflags was found. "
+"This will make gflags a public dependency of Ceres.")
+if (NOT GFLAGS_FOUND)
+set(GLOG_GFLAGS_DEPENDENCY_MESSAGE
+" Assuming glog was NOT built with gflags support as gflags was "
+"not found.  If glog was built with gflags, please set the "
+"gflags search locations such that it can be found by Ceres.  "
+"Otherwise, Ceres may fail to link due to missing gflags symbols.")
+endif(NOT GFLAGS_FOUND)
+
+
+
 list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${GLOG_INCLUDE_DIRS})
 list(APPEND Caffe_LINKER_LIBS PUBLIC ${GLOG_LIBRARIES})
 
@@ -48,17 +69,7 @@ list(APPEND Caffe_LINKER_LIBS PUBLIC ${GFLAGS_LIBRARIES})
 include(cmake/ProtoBuf.cmake)
 
 # ---[ HDF5
-if(MSVC)
-  # Find HDF5 using it's hdf5-config.cmake file with MSVC
-  if(DEFINED HDF5_DIR)
-    list(APPEND CMAKE_MODULE_PATH ${HDF5_DIR})
-  endif()
-  find_package(HDF5 COMPONENTS C HL REQUIRED)
-  set(HDF5_LIBRARIES hdf5-shared)
-  set(HDF5_HL_LIBRARIES hdf5_hl-shared)
-else()
-  find_package(HDF5 COMPONENTS HL REQUIRED)
-endif()
+find_package(HDF5 COMPONENTS HL REQUIRED)
 list(APPEND Caffe_INCLUDE_DIRS PUBLIC ${HDF5_INCLUDE_DIRS})
 list(APPEND Caffe_LINKER_LIBS PUBLIC ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 
@@ -101,7 +112,7 @@ if(NOT HAVE_CUDA)
 endif()
 
 if(USE_NCCL)
-  include("cmake/External/nccl.cmake")
+  find_package(NCCL REQUIRED)
   include_directories(SYSTEM ${NCCL_INCLUDE_DIR})
   list(APPEND Caffe_LINKER_LIBS ${NCCL_LIBRARIES})
   add_definitions(-DUSE_NCCL)
@@ -188,9 +199,6 @@ if(BUILD_python)
   endif()
   if(PYTHONLIBS_FOUND AND NUMPY_FOUND AND Boost_PYTHON_FOUND)
     set(HAVE_PYTHON TRUE)
-    if(Boost_USE_STATIC_LIBS AND MSVC)
-      list(APPEND Caffe_DEFINITIONS PUBLIC -DBOOST_PYTHON_STATIC_LIB)
-    endif()
     if(BUILD_python_layer)
       list(APPEND Caffe_DEFINITIONS PRIVATE -DWITH_PYTHON_LAYER)
       list(APPEND Caffe_INCLUDE_DIRS PRIVATE ${PYTHON_INCLUDE_DIRS} ${NUMPY_INCLUDE_DIR} PUBLIC ${Boost_INCLUDE_DIRS})
@@ -201,17 +209,11 @@ endif()
 
 # ---[ Matlab
 if(BUILD_matlab)
-  if(MSVC)
-    find_package(Matlab COMPONENTS MAIN_PROGRAM MX_LIBRARY)
-    if(MATLAB_FOUND)
-      set(HAVE_MATLAB TRUE)
-    endif()
-  else()
-    find_package(MatlabMex)
-    if(MATLABMEX_FOUND)
-      set(HAVE_MATLAB TRUE)
-    endif()
+  find_package(MatlabMex)
+  if(MATLABMEX_FOUND)
+    set(HAVE_MATLAB TRUE)
   endif()
+
   # sudo apt-get install liboctave-dev
   find_program(Octave_compiler NAMES mkoctfile DOC "Octave C++ compiler")
 
