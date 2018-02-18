@@ -3,6 +3,7 @@ include("cmake/External/gflags.cmake")
 
 if (NOT __GLOG_INCLUDED)
   set(__GLOG_INCLUDED TRUE)
+message("SEARCHING FOR GLOG 1")
 
   # try the system-wide glog first
   find_package(Glog)
@@ -10,7 +11,7 @@ if (NOT __GLOG_INCLUDED)
       set(GLOG_EXTERNAL FALSE)
   else()
     # fetch and build glog from github
-
+message("GLOG not found")
     # build directory
     set(glog_PREFIX ${CMAKE_BINARY_DIR}/external/glog-prefix)
     # install directory

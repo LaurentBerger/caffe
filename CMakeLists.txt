@@ -72,9 +72,20 @@ if(MSVC AND BUILD_SHARED_LIBS)
   # to protobuf this problem should not happen. Use at your own risk.
   message(WARNING "Some tests (solvers) will fail when building as a shared library with MSVC")
 endif()
+if(MSVC)
+  set(MSVC_DISABLED_WARNINGS -wd4251 -wd4146 -wd4661 -wd4247 -wd4267 -wd4244 -wd4305)
+  add_compile_options(${MSVC_DISABLED_WARNINGS})
+  add_compile_options("-DNO_STRICT")
+  add_compile_options("-DGFLAGS_DLL_DECLARE_FLAG=")
+  add_compile_options("-DGFLAGS_DLL_DEFINE_FLAG=")
+  add_compile_options("-DGLOG_NO_ABBREVIATED_SEVERITIES")
+  add_compile_options("-DGOOGLE_GLOG_DLL_DECL=")
+endif()
 
 # ---[ Prebuild dependencies on windows
+if (INSTALL_PREREQUISITES)
 include(cmake/WindowsDownloadPrebuiltDependencies.cmake)
+endif(INSTALL_PREREQUISITES)
 
 # ---[ Dependencies
 include(cmake/Dependencies.cmake)
