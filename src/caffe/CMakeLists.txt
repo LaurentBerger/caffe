@@ -13,8 +13,9 @@ list(INSERT Caffe_LINKER_LIBS 0 PUBLIC caffeproto) # note, crucial to prepend!
 # --[ Caffe library
 
 # creates 'test_srcs', 'srcs', 'test_cuda', 'cuda' lists
+message ("sssss ${caffe_export_hdr_in} ${caffe_export_hdr}" )
 caffe_pickup_caffe_sources(${PROJECT_SOURCE_DIR})
-
+message ("sssss ${caffe_export_hdr_in} ${caffe_export_hdr}" )
 # add this option here since CUDA will not honor
 # target_compile_definitions
 if(MSVC AND NOT BUILD_SHARED_LIBS)
@@ -93,7 +94,7 @@ endif()
 if(MSVC AND USE_NCCL)
   add_dependencies(caffe nccl)
 endif()
-
+message (${caffe_export_hdr_in} ${caffe_export_hdr} )
 configure_file(${caffe_export_hdr_in} ${caffe_export_hdr})
 
 # ---[ Tests
